@@ -7,6 +7,7 @@ output: github_document
 ```{r}
 library(tidyverse)
 library(p8105.datasets)
+library(patchwork)
 data("ny_noaa")
 
 knitr::opts_chunk$set(
@@ -99,7 +100,7 @@ ny_noaa_df %>%
 
 
 ```{r}
-tamx_vs_tmin = 
+tmax_vs_tmin = 
   ny_noaa_df %>%
   ggplot(aes(x = tmax, y = tmin)) + 
   geom_hex()
@@ -110,5 +111,7 @@ snowfall_dist =
   filter(snow > 0) %>%
   ggplot(aes(x = year, y = snow)) + geom_violin(alpha = 0.5) + 
   theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust = 1))
+
+tmax_vs_tmin + snowfall_dist
 ```
 
