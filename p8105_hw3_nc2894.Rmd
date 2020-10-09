@@ -68,7 +68,7 @@ accel_df %>%
 ```{r}
 ny_noaa_df =
   ny_noaa %>% 
-  separate(date, into = c("year", "month", "day"), sep = "/") %>%
+  separate(date, into = c("year", "month", "day"), sep = "-") %>%
   mutate(
     tmax = as.numeric(tmax),
     tmin = as.numeric(tmin),
@@ -85,13 +85,15 @@ ny_noaa_df %>%
 
 ```{r}
 ny_noaa_df %>% 
- filter(month %in% c("1", "7")) %>%
+ filter(month %in% c("01", "07")) %>%
   group_by(id, year, month) %>%
   summarize(
     mean_tmax = mean(tmax, na.rm = TRUE)) %>%
   ggplot(aes(x = year, y = mean_tmax, group = id)) + 
   geom_point(alpha = 0.5, size = 0.5) +
-  geom_path()
+  geom_path() +
+  facet_grid(.~month) +
+  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust = 1))
   
 ```
 
