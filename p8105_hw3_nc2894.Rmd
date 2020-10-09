@@ -1,0 +1,6 @@
+---
+title: "Homework 3"
+author: Na Yun Cho
+output: github_document
+---
+
