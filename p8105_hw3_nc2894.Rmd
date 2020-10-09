@@ -4,3 +4,29 @@ author: Na Yun Cho
 output: github_document
 ---
 
+```{r}
+library(tidyverse)
+```
+
+
+
+# Problem 2
+
+```{r}
+accel_df = read.csv("./data/accel_data.csv") %>%
+  janitor::clean_names() %>%
+  pivot_longer(
+    activity_1:activity_1440, 
+    names_to = "minute",
+    names_prefix = "activity_", 
+    values_to = "activity_count"
+  ) %>%
+  mutate(
+    minute = as.numeric(minute),
+    day = factor(day),
+    day = fct_relevel(day, "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"),
+    weekend = as.numeric(day %in% c("Saturday", "Sunday")),
+    weekend = recode(weekend, '1' = "weekend", '0' = "weekday"))
+
+```
+
