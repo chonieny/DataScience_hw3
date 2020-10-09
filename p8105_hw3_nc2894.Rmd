@@ -6,6 +6,8 @@ output: github_document
 
 ```{r}
 library(tidyverse)
+library(p8105.datasets)
+data("ny_noaa")
 ```
 
 
@@ -46,4 +48,37 @@ accel_df %>%
   geom_line(alpha =0.2) + 
   geom_smooth(aes(group = day), se = FALSE)
 ```
+
+# Problem 3
+
+```{r}
+ny_noaa_df =
+  ny_noaa %>% 
+  separate(date, into = c("year", "month", "day"), sep = "/") %>%
+  mutate(
+    tmax = as.numeric(tmax),
+    tmin = as.numeric(tmin),
+    tmax = tmax/10,
+    tmin = tmin/10,
+    prcp = prcp/10
+  )
+
+ny_noaa_df %>%
+  count(snow) %>%
+  arrange(desc(n))
+  
+```
+
+```{r}
+ny_noaa_df %>% 
+ filter(month %in% c("01", "07")) %>%
+  group_by(id, year, month) %>%
+  summarize(
+    mean_tmax = mean(tmax, na.rm = TRUE)) %>%
+  ggplot(aes(x = year, y = mean_tmax, group = id)) + 
+  geom_point(alpha = 0.5, size = 0.5) +
+  geom_path()
+  
+```
+
 
