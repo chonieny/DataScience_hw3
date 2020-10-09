@@ -30,3 +30,20 @@ accel_df = read.csv("./data/accel_data.csv") %>%
 
 ```
 
+```{r}
+accel_df %>% 
+  group_by(day , week) %>%
+  summarize(act_total = sum(activity_count)) %>%
+  pivot_wider(
+    names_from = day, 
+    values_from = act_total)
+  
+```
+
+```{r}
+accel_df %>%
+  ggplot(aes(x= minute, y= activity_count, group = day_id, color = day)) +
+  geom_line(alpha =0.2) + 
+  geom_smooth(aes(group = day), se = FALSE)
+```
+
