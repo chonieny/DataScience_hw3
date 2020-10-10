@@ -26,9 +26,10 @@ options(
 ```
 
 
-
 # Problem 2
 
+
+### Part 1 
 ```{r}
 accel_df = read.csv("./data/accel_data.csv") %>%
   janitor::clean_names() %>%
@@ -47,6 +48,8 @@ accel_df = read.csv("./data/accel_data.csv") %>%
 
 ```
 
+
+### Part 2 
 ```{r}
 accel_df %>% 
   group_by(day , week) %>%
@@ -57,6 +60,8 @@ accel_df %>%
   
 ```
 
+
+### Part 3
 ```{r}
 accel_df %>%
   ggplot(aes(x= minute, y= activity_count, group = day_id, color = day)) +
@@ -64,8 +69,12 @@ accel_df %>%
   geom_smooth(aes(group = day), se = FALSE)
 ```
 
+
+
 # Problem 3
 
+
+### Part 1
 ```{r}
 ny_noaa_df =
   ny_noaa %>% 
@@ -84,6 +93,8 @@ ny_noaa_df %>%
   
 ```
 
+
+### Part 2
 ```{r}
 ny_noaa_df %>% 
  filter(month %in% c("01", "07")) %>%
@@ -99,6 +110,7 @@ ny_noaa_df %>%
 ```
 
 
+### Part 3
 ```{r}
 tmax_vs_tmin = 
   ny_noaa_df %>%
