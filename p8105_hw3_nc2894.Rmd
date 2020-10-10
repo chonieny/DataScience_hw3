@@ -29,7 +29,7 @@ options(
 # Problem 2
 
 
-### Part 1 
+### Part 1) Load, tidy, and wrangle the data
 ```{r}
 accel_df = read.csv("./data/accel_data.csv") %>%
   janitor::clean_names() %>%
@@ -37,19 +37,23 @@ accel_df = read.csv("./data/accel_data.csv") %>%
     activity_1:activity_1440, 
     names_to = "minute",
     names_prefix = "activity_", 
-    values_to = "activity_count"
-  ) %>%
+    values_to = "activity_count") %>%
+  mutate(weekday_vs_weekend = recode(day, Monday = "weekday", Tuesday = "weekday", Wednesday = "weekday", 
+                                     Thursday = "weekday", Friday = "weekday", Saturday = "weekend", Sunday = 
+                                     "weekend")) %>%
+  relocate(weekday_vs_weekend, .after = day) %>%
   mutate(
     minute = as.numeric(minute),
-    day = factor(day),
+    day = as.factor(day), 
     day = fct_relevel(day, "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"),
-    weekend = as.numeric(day %in% c("Saturday", "Sunday")),
-    weekend = recode(weekend, '1' = "weekend", '0' = "weekday"))
+    weekday_vs_weekend = as.factor(weekday_vs_weekend))
 
+accel_df %>% view
 ```
 
+Comment: The resulting dataset shows the accelerometer data collected on a 63 year-old male with BMI 25, who was diagnosed with congestive heart failure and was admitted to the Advaned Cardiac Care Center of Columbia University Medical Center. More specifically, the data show the activity counts per each minute every day during the five weeks the data was collected from. The variables in the resulting dataset are `r names(accel_df)`. The variable 'minute' indicates which minute of the 24-hour day the activity occurred starting at midnight, and 'activity_count' denotes the count of the activity that occurred per each minute. In this dataset, there are a total of `r nrow(accel_df)` observations. 
 
-### Part 2 
+### Part 2) Create a table that shows the total minutes of activity for each day 
 ```{r}
 accel_df %>% 
   group_by(day , week) %>%
@@ -57,11 +61,13 @@ accel_df %>%
   pivot_wider(
     names_from = day, 
     values_from = act_total)
-  
 ```
 
+Comment: The resulting table shows the total minutes of activity per each day for five weeks. It seems that generally the days around weekends tend to show more peak activity counts than the weekdays. This is shown by activity counts over 600,000 occurring on week 1 of Sunday, week 3 of Monday, week 5 of Friday, and week 2 of Saturday whereas such counts never occurred on Tuesday, Wednesday, or Thursday. 
+However, further analyses would have to be done to identify specific trends with certainty, because the activity counts seem to be quite similar across all days throughout each week.
+Furthermore, the table shows that two Saturdays have significantly low numbers of activity counts compared to activity counts of all the other days. From inspection of the dataset, all the activity counts of these two Saturdays are recorded as '1', which could be due to mistake or errors. 
 
-### Part 3
+### Part 3) Create a single-panel plot that shows the 24-hour activity time courses for each day
 ```{r}
 accel_df %>%
   ggplot(aes(x= minute, y= activity_count, group = day_id, color = day)) +
@@ -69,6 +75,9 @@ accel_df %>%
   geom_smooth(aes(group = day), se = FALSE)
 ```
 
+Comment: The resulting graph shows the activity counts over 24-hours of each day during the five weeks. It seems that the activity counts generally cluster the most around 11:00am to 12pm (before and around 750 minutes) and around 8pm to 9:30 pm (before and around 1250 minutes). 
+In addition, there seems to be a peak in activity on Sunday around 11am (before 750 minutes) and a peak in activity on Friday around 9pm (around 1250 minutes). 
+Furthermore, according to the graph, I may be able to infer that the person usually wakes up before 8am (before 500 minutes) and goes to sleep around 10pm (around 1320 minutes). 
 
 
 # Problem 3
@@ -91,6 +100,8 @@ ny_noaa_df %>%
   count(snow) %>%
   arrange(desc(n))
   
+
+ny_noaa_df %>% view
 ```
 
 
@@ -102,7 +113,7 @@ ny_noaa_df %>%
   summarize(
     mean_tmax = mean(tmax, na.rm = TRUE)) %>%
   ggplot(aes(x = year, y = mean_tmax, group = id)) + 
-  geom_point(alpha = 0.5, size = 0.5) +
+  geom_point(alpha = 0.5) +
   geom_path() +
   facet_grid(.~month) +
   theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust = 1))
