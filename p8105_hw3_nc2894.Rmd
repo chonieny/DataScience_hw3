@@ -70,9 +70,10 @@ Furthermore, the table shows that two Saturdays have significantly low numbers o
 ### Part 3) Create a single-panel plot that shows the 24-hour activity time courses for each day
 ```{r}
 accel_df %>%
-  ggplot(aes(x= minute, y= activity_count, group = day_id, color = day)) +
-  geom_line(alpha =0.2) + 
+  ggplot(aes(x = minute, y = activity_count, group = day_id, color = day)) +
+  geom_line(alpha = 0.2) + 
   geom_smooth(aes(group = day), se = FALSE)
+
 ```
 
 Comment: The resulting graph shows the activity counts over 24-hours of each day during the five weeks. It seems that the activity counts generally cluster the most around 11:00am to 12pm (before and around 750 minutes) and around 8pm to 9:30 pm (before and around 1250 minutes). 
@@ -81,7 +82,6 @@ Furthermore, according to the graph, I may be able to infer that the person usua
 
 
 # Problem 3
-
 
 ### Part 1
 ```{r}
@@ -99,10 +99,13 @@ ny_noaa_df =
 ny_noaa_df %>%
   count(snow) %>%
   arrange(desc(n))
-  
-
-ny_noaa_df %>% view
 ```
+
+Comment (before data cleaning): These data are accessed from the NOAA National Climatic Data Center, and the data show the amount of precipitation, snowfall, the depth of snow, and the maximum an minimum temperatures on days ranging from January 1st 1981 to December 31st 2010 within New York State. The variables included in this dataset are `r names(ny_noaa_df)`. The 'id' variable indicates the weather station ID, 'prcp' indicates the amount of precipitation in tenths of mm, 'snow' denotes snowfall in mm, 'snwd' denotes snow depth in mm, and 'tmax' and  'tmin' indicate the maximum and minimum temperatures in tenths of degrees Celsius respectively. The dataset has `r nrow(ny_noaa_df)` rows and `r ncol(ny_noaa_df)` columns. 
+Some of the key variables of this dataset would be 'snow', 'tmax', and 'tmin', but I can observe that too many of the 'tmax', 'tmin', and 'snow' values are missing (written as NA's), which could affect the validity of the conclusions drawn from this dataset. 
+
+
+Comment: The most commonly observed values for snowfall was 0, because the dataset contains 2008508 observations of the value 0 among all the values of snowfall. This may be due to the fact that it does not snow during most of the days in New York State. 
 
 
 ### Part 2
@@ -119,6 +122,12 @@ ny_noaa_df %>%
   theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust = 1))
   
 ```
+
+Comment: The two-panel plot shows the average maximum temperature in January and in July in each station throughout the years of 1981 to 2010. The plot shows a slight increasing trend in the average maximum temperature in January across the years, but it is hard to observe such a trend in the average maximum temperature in July across the years. 
+Although the maximum temperatures are fairly consistent in January and July throughout the years, there seems to be more variation in maximum temperatures in January than in July across the years. 
+In addition, the average maximum temperatures in January is much lower than the average maximum temperatures in July. 
+For the data in January, there is one extreme outlier in 1982 that is lower than the values of the other years. 
+For the data in July, there is also a drastic outlier that occurred in 1988 that is lower than the vaules of the other years. In both January and July, there are some other less drastic outlier as well. 
 
 
 ### Part 3
@@ -138,3 +147,8 @@ snowfall_dist =
 tmax_vs_tmin + snowfall_dist
 ```
 
+Comment: The two-panel plot includes the (i) hex plot shoing tmax vs tmin for the dataset and (ii) violin plot showing the distribution of snowfall values greater than 0 and less than 100 for every year. 
+
+The hex plot indicates that although there is some variability throughout the dataset, most of the data cluster around the center of the distribution. There also seems to be some cases where the maximum temperature is lower than the minimum temperature, which would reduce the accuracy of the conclusions drawn from the dataset.
+
+The violin plot shows that most of the annual snowfalls are between 0mm and 35mm across the years. The plot also indicates that annual snowfalls also tend to cluster around the values of 50 mm and 70 mm of snow across the years. These clusters are fairly consistent throughout the years. 
