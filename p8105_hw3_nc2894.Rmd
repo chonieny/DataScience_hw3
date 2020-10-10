@@ -8,6 +8,7 @@ output: github_document
 library(tidyverse)
 library(p8105.datasets)
 library(patchwork)
+data("instacart")
 data("ny_noaa")
 
 knitr::opts_chunk$set(
@@ -24,6 +25,56 @@ options(
   ggplot2.continuous.fill = "viridis"
 )
 ```
+
+# Problem 1
+
+
+### Part 1) Number of aisles, identify aisles in which the most items were ordered from
+```{r}
+instacart %>%
+  count(aisle) %>%
+  arrange(desc(n))
+```
+
+### Part 2) Make a plot of the number of items ordered in each aisle (n>10000)
+```{r}
+instacart %>%
+  count(aisle) %>%
+  filter(n > 10000) %>%
+  mutate(
+    aisle = factor(aisle), 
+    aisle = fct_reorder(aisle, n)
+  ) %>%
+  ggplot(aes(x = aisle, y = n)) + 
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 270 , vjust = 0.5, hjust = 1))
+  
+```
+
+### Part 3) Show the three most popular items in each of the aisles 
+```{r}
+instacart %>%
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetable fruits")) %>%
+  group_by(aisle) %>%
+  count(product_name) %>%
+  mutate(rank = min_rank(desc(n))) %>%
+  filter(rank < 4) %>%
+  arrange(aisle, rank) %>%
+  knitr::kable()
+```
+
+### Part 4) Make a table that shows the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week
+```{r}
+instacart %>%
+  filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>%
+  group_by(product_name, order_dow) %>%
+  summarize(mean_hour = mean(order_hour_of_day)) %>%
+  pivot_wider(
+    names_from = order_dow,
+    values_from = mean_hour
+  )
+```
+
 
 
 # Problem 2
@@ -48,10 +99,9 @@ accel_df = read.csv("./data/accel_data.csv") %>%
     day = fct_relevel(day, "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"),
     weekday_vs_weekend = as.factor(weekday_vs_weekend))
 
-accel_df %>% view
 ```
 
-Comment: The resulting dataset shows the accelerometer data collected on a 63 year-old male with BMI 25, who was diagnosed with congestive heart failure and was admitted to the Advaned Cardiac Care Center of Columbia University Medical Center. More specifically, the data show the activity counts per each minute every day during the five weeks the data was collected from. The variables in the resulting dataset are `r names(accel_df)`. The variable 'minute' indicates which minute of the 24-hour day the activity occurred starting at midnight, and 'activity_count' denotes the count of the activity that occurred per each minute. In this dataset, there are a total of `r nrow(accel_df)` observations. 
+Comment: The resulting dataset shows the accelerometer data collected on a 63 year-old male with BMI 25, who was diagnosed with congestive heart failure and was admitted to the Advaned Cardiac Care Center of Columbia University Medical Center. More specifically, the data show the activity counts per each minute every day during the five weeks the data was collected from. The variables in this resulting dataset are `r names(accel_df)`. The variable 'minute' indicates which minute of the 24-hour day the activity occurred starting at midnight, and 'activity_count' denotes the count of the activity that occurred per each minute. In this dataset, there are a total of `r nrow(accel_df)` observations. 
 
 ### Part 2) Create a table that shows the total minutes of activity for each day 
 ```{r}
@@ -63,7 +113,7 @@ accel_df %>%
     values_from = act_total)
 ```
 
-Comment: The resulting table shows the total minutes of activity per each day for five weeks. It seems that generally the days around weekends tend to show more peak activity counts than the weekdays. This is shown by activity counts over 600,000 occurring on week 1 of Sunday, week 3 of Monday, week 5 of Friday, and week 2 of Saturday whereas such counts never occurred on Tuesday, Wednesday, or Thursday. 
+Comment: The resulting table shows the total minutes of activity per each day for five weeks. It seems that generally the days around weekends tend to show more peak activity counts than the weekdays. This is shown by activity counts over 600,000 occurring on week1 of Sunday, week3 of Monday, week5 of Friday, and week2 of Saturday whereas such counts never occurred on Tuesday, Wednesday, or Thursday. 
 However, further analyses would have to be done to identify specific trends with certainty, because the activity counts seem to be quite similar across all days throughout each week.
 Furthermore, the table shows that two Saturdays have significantly low numbers of activity counts compared to activity counts of all the other days. From inspection of the dataset, all the activity counts of these two Saturdays are recorded as '1', which could be due to mistake or errors. 
 
@@ -72,7 +122,8 @@ Furthermore, the table shows that two Saturdays have significantly low numbers o
 accel_df %>%
   ggplot(aes(x = minute, y = activity_count, group = day_id, color = day)) +
   geom_line(alpha = 0.2) + 
-  geom_smooth(aes(group = day), se = FALSE)
+  geom_smooth(aes(group = day), se = FALSE) +
+  labs(title = "24-Hour Activity Time Courses for Each Day")
 
 ```
 
@@ -83,7 +134,7 @@ Furthermore, according to the graph, I may be able to infer that the person usua
 
 # Problem 3
 
-### Part 1
+### Part 1) Clean the data, identify the most commonly observed values for snowfall
 ```{r}
 ny_noaa_df =
   ny_noaa %>% 
@@ -105,10 +156,10 @@ Comment (before data cleaning): These data are accessed from the NOAA National C
 Some of the key variables of this dataset would be 'snow', 'tmax', and 'tmin', but I can observe that too many of the 'tmax', 'tmin', and 'snow' values are missing (written as NA's), which could affect the validity of the conclusions drawn from this dataset. 
 
 
-Comment: The most commonly observed values for snowfall was 0, because the dataset contains 2008508 observations of the value 0 among all the values of snowfall. This may be due to the fact that it does not snow during most of the days in New York State. 
+Comment: The most commonly observed values for snowfall was 0, because the dataset contains 2008508 observations of the value 0, which is the largest number of observations among the observations of each of the values of snowfall. This may be due to the fact that it does not snow during most of the days in New York State. 
 
 
-### Part 2
+### Part 2) Make a two-panel plot that shows the average maximum temperature in January and July across the years
 ```{r}
 ny_noaa_df %>% 
  filter(month %in% c("01", "07")) %>%
@@ -119,18 +170,19 @@ ny_noaa_df %>%
   geom_point(alpha = 0.5) +
   geom_path() +
   facet_grid(.~month) +
-  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust = 1))
+  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust = 1)) +
+  labs(title = "Average Maximum Temperature in January and July in Each Station Across Years")
   
 ```
 
 Comment: The two-panel plot shows the average maximum temperature in January and in July in each station throughout the years of 1981 to 2010. The plot shows a slight increasing trend in the average maximum temperature in January across the years, but it is hard to observe such a trend in the average maximum temperature in July across the years. 
-Although the maximum temperatures are fairly consistent in January and July throughout the years, there seems to be more variation in maximum temperatures in January than in July across the years. 
+Although the maximum temperatures are fairly consistent in both January and July throughout the years, there seems to be more variation in maximum temperatures in January than in July across the years. 
 In addition, the average maximum temperatures in January is much lower than the average maximum temperatures in July. 
 For the data in January, there is one extreme outlier in 1982 that is lower than the values of the other years. 
-For the data in July, there is also a drastic outlier that occurred in 1988 that is lower than the vaules of the other years. In both January and July, there are some other less drastic outlier as well. 
+For the data in July, there is also a drastic outlier that occurred in 1988 that is lower than the vaules of the other years. In both January and July, there are also some other less drastic outliers as well. 
 
 
-### Part 3
+### Part 3 Make a two-panel plot of (i) tmax vs tmin & (2) distribution of snowfall greater than 0 less than 100 by year
 ```{r}
 tmax_vs_tmin = 
   ny_noaa_df %>%
@@ -144,10 +196,10 @@ snowfall_dist =
   ggplot(aes(x = year, y = snow)) + geom_violin(alpha = 0.5) + 
   theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust = 1))
 
-tmax_vs_tmin + snowfall_dist
+tmax_vs_tmin + snowfall_dist 
 ```
 
-Comment: The two-panel plot includes the (i) hex plot shoing tmax vs tmin for the dataset and (ii) violin plot showing the distribution of snowfall values greater than 0 and less than 100 for every year. 
+Comment: The two-panel plot includes the (i) hex plot showing tmax vs tmin for the dataset and (ii) violin plot showing the distribution of snowfall values greater than 0 and less than 100 for every year. 
 
 The hex plot indicates that although there is some variability throughout the dataset, most of the data cluster around the center of the distribution. There also seems to be some cases where the maximum temperature is lower than the minimum temperature, which would reduce the accuracy of the conclusions drawn from the dataset.
 
